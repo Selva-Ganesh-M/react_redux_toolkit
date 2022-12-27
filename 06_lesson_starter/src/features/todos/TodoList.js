@@ -1,4 +1,9 @@
-import { useGetTodosQuery } from "../api/apiSlice";
+import {
+  useGetTodosQuery,
+  useAddTodoMutation,
+  useUpdateTodoMutation,
+  useDeleteTodoMutation,
+} from "../api/apiSlice";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faUpload } from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
@@ -12,10 +17,17 @@ const TodoList = () => {
     isSuccess,
     error,
   } = useGetTodosQuery();
+  const [addTodo] = useAddTodoMutation();
+  const [updateTodo] = useUpdateTodoMutation();
+  const [deleteTodo] = useDeleteTodoMutation();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    //addTodo
+    addTodo({
+      userId: 1,
+      title: newTodo,
+      completed: false,
+    });
     setNewTodo("");
   };
 
@@ -23,8 +35,32 @@ const TodoList = () => {
   if (isLoading) {
     return "loading";
   } else if (isSuccess) {
-    content = JSON.stringify(todos);
-    // return JSON.stringify(todos, null, 2);
+    // content = JSON.stringify(todos);
+    content = todos.map((todo) => (
+      <div
+        key={todo.id}
+        style={{ display: "flex", justifyContent: "space-between" }}
+      >
+        <div>
+          <input
+            type="checkbox"
+            checked={todo.completed}
+            onChange={() => {
+              console.log(todo.id);
+              updateTodo({ ...todo, completed: !todo.completed }, todo.id);
+            }}
+          ></input>
+        </div>
+        <div>
+          <label>{todo.title}</label>
+        </div>
+        <div>
+          <a onClick={() => deleteTodo(todo.id)} style={{ color: "red" }}>
+            delete
+          </a>
+        </div>
+      </div>
+    ));
   } else if (isError) {
     return error;
   }
